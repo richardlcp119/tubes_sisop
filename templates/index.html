@@ -9,21 +9,27 @@
 <body>
     <div class="container">
         <div class="card input-card">
-            <h2>Input</h2>
+            <h2>Input (Non-Preemptive Focus)</h2>
             <form method="POST">
                 <div class="form-group">
                     <label for="algorithm">Algorithm</label>
                     <select id="algorithm" name="algorithm">
-                        <option value="fcfs">First Come First Serve, FCFS</option>
-                        </select>
+                        <option value="fcfs" {% if inputs.algo == 'fcfs' %}selected{% endif %}>First Come First Serve (FCFS)</option>
+                        <option value="sjf" {% if inputs.algo == 'sjf' %}selected{% endif %}>SJF Non-Preemptive</option>
+                        <option value="priority_np" {% if inputs.algo == 'priority_np' %}selected{% endif %}>Priority Non-Preemptive</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="arrival_times">Arrival Times</label>
-                    <input type="text" id="arrival_times" name="arrival_times" placeholder="Contoh: 2 4 6" value="{{ inputs.arrival }}" required>
+                    <input type="text" id="arrival_times" name="arrival_times" placeholder="Contoh: 0 2 4 5" value="{{ inputs.arrival }}" required>
                 </div>
                 <div class="form-group">
                     <label for="burst_times">Burst Times</label>
-                    <input type="text" id="burst_times" name="burst_times" placeholder="Contoh: 2 4 2" value="{{ inputs.burst }}" required>
+                    <input type="text" id="burst_times" name="burst_times" placeholder="Contoh: 7 4 1 4" value="{{ inputs.burst }}" required>
+                </div>
+                <div class="form-group" id="priority-group">
+                    <label for="priority_times">Priorities (Hanya untuk Priority Algo)</label>
+                    <input type="text" id="priority_times" name="priority_times" placeholder="Contoh: 3 1 2 4" value="{{ inputs.priority }}">
                 </div>
                 <button type="submit" class="btn-solve">Solve</button>
             </form>
@@ -32,11 +38,13 @@
         <div class="card output-card">
             <div class="output-header">
                 <h2>Output</h2>
-                <span class="badge">FCFS</span>
+                <span class="badge">{{ inputs.algo.upper() }}</span>
             </div>
 
             {% if hasil == "error_len" %}
                 <p class="error-msg">Error: Jumlah elemen Waktu Kedatangan dan Durasi harus sama!</p>
+            {% elif hasil == "error_priority_len" %}
+                <p class="error-msg">Error: Jumlah elemen Prioritas harus sama dengan jumlah proses!</p>
             {% elif hasil == "error_val" %}
                 <p class="error-msg">Error: Tolong masukkan format angka yang dipisahkan spasi saja.</p>
             {% elif hasil %}
@@ -63,6 +71,9 @@
                             <th>Job</th>
                             <th>Arrival Time</th>
                             <th>Burst Time</th>
+                            {% if inputs.algo == 'priority_np' %}
+                            <th>Priority</th>
+                            {% endif %}
                             <th>Finish Time</th>
                             <th>Turnaround Time</th>
                             <th>Waiting Time</th>
@@ -74,13 +85,16 @@
                             <td>{{ p.id }}</td>
                             <td>{{ p.arrival_time }}</td>
                             <td>{{ p.burst_time }}</td>
+                            {% if inputs.algo == 'priority_np' %}
+                            <td>{{ p.priority }}</td>
+                            {% endif %}
                             <td>{{ p.finish_time }}</td>
                             <td>{{ p.turnaround_time }}</td>
                             <td>{{ p.waiting_time }}</td>
                         </tr>
                         {% endfor %}
                         <tr class="row-average">
-                            <td colspan="4" style="text-align: right; font-weight: bold;">Average</td>
+                            <td colspan="{% if inputs.algo == 'priority_np' %}5{% else %}4{% endif %}" style="text-align: right; font-weight: bold;">Average</td>
                             <td>{{ rata_tat }}</td>
                             <td>{{ rata_wt }}</td>
                         </tr>
