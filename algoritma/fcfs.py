@@ -5,7 +5,7 @@ def hitung_fcfs(arrival_times, burst_times):
     # Satukan input menjadi list of dictionary agar mudah dikelola
     for i in range(n):
         proses.append({
-            'id': chr(65 + i),  # Mengubah indeks 0, 1, 2 menjadi A, B, C...
+            'id': f'P{i+1}',  # Mengubah indeks 0, 1, 2 menjadi A, B, C...
             'arrival_time': arrival_times[i],
             'burst_time': burst_times[i]
         })

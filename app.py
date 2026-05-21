@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import json  # Tambahkan import ini
 from algoritma.fcfs import hitung_fcfs
 
 app = Flask(__name__)
@@ -10,21 +11,23 @@ def index():
     rata_tat = 0
     rata_wt = 0
     throughput = 0
-    inputs = {'arrival': '', 'burst': ''}
+    
+    # State awal: 1 baris input kosong
+    inputs_json = '[{"arrival": "", "burst": ""}]'
 
     if request.method == 'POST':
         try:
-            # Ambil data string dari form HTML
-            arrival_raw = request.form.get('arrival_times', '')
-            burst_raw = request.form.get('burst_times', '')
+            # Ambil data input array (kolom ganda) dari HTML
+            arrival_raw = request.form.getlist('arrival[]')
+            burst_raw = request.form.getlist('burst[]')
             
-            # Simpan kembali ke form agar input tidak hilang saat di-refresh
-            inputs['arrival'] = arrival_raw
-            inputs['burst'] = burst_raw
+            # Ubah data mentah menjadi JSON agar inputan user tidak hilang saat direfresh
+            inputs_data = [{'arrival': a, 'burst': b} for a, b in zip(arrival_raw, burst_raw)]
+            inputs_json = json.dumps(inputs_data)
 
-            # Ubah string spasi "2 4 6" menjadi list angka [2, 4, 6]
-            arrival_times = [int(x) for x in arrival_raw.split()]
-            burst_times = [int(x) for x in burst_raw.split()]
+            # Konversi teks ke angka (hanya proses data yang tidak kosong)
+            arrival_times = [int(x) for x in arrival_raw if x.strip() != '']
+            burst_times = [int(x) for x in burst_raw if x.strip() != '']
 
             if len(arrival_times) == len(burst_times) and len(arrival_times) > 0:
                 hasil, gantt, rata_tat, rata_wt, throughput = hitung_fcfs(arrival_times, burst_times)
@@ -35,7 +38,7 @@ def index():
 
     return render_template('index.html', hasil=hasil, gantt=gantt, 
                            rata_tat=rata_tat, rata_wt=rata_wt, 
-                           throughput=throughput, inputs=inputs)
+                           throughput=throughput, inputs_json=inputs_json)
 
 if __name__ == '__main__':
     app.run(debug=True)
