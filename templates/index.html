@@ -8,37 +8,38 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
+    <div class="container" x-data="{ algo: '{{ selected_algo }}' }">
         <div class="card input-card">
-            <h2>Input</h2>
-            <form method="POST" x-data='{ processes: {{ inputs_json | safe }}, alg: "{{ algoritma_terpilih | default('fcfs') }}" }'>
+            <h2>Input (Non-Preemptive Focus)</h2>
+            <form method="POST" x-data='{ processes: {{ inputs_json | safe }} }'>
                 <div class="form-group">
                     <label for="algorithm">Algorithm</label>
-                    <select id="algorithm" name="algorithm" x-model="alg">
+                    <select id="algorithm" name="algorithm" x-model="algo">
                         <option value="fcfs">First Come First Serve, FCFS</option>
-                        <option value="rr">Round Robin, RR</option> </select>
-                </div>
-
-                <div class="form-group" x-show="alg === 'rr'">
-                    <label for="quantum">Time Quantum</label>
-                    <input type="number" id="quantum" name="quantum" value="{{ quantum }}" placeholder="Masukkan Quantum Time (min 1)" min="1">
+                        <option value="sjf">SJF Non-Preemptive</option>
+                        <option value="priority_np">Priority Non-Preemptive</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label>Data Proses (Arrival & Burst)</label>
+                    <label>Data Proses (Arrival, Burst, & Priority)</label>
                     
                     <template x-for="(proc, index) in processes" :key="index">
-                        <div class="process-row">
-                            <span class="row-number" x-text="`P${index + 1}`"></span>
+                        <div class="process-row" style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+                            <span class="row-number" x-text="`P${index + 1}`" style="font-weight: bold; min-width: 30px;"></span>
                             
-                            <input type="number" name="arrival[]" x-model="proc.arrival" placeholder="Arrival Time" min="0" required>
-                            <input type="number" name="burst[]" x-model="proc.burst" placeholder="Burst Time" min="1" required>
+                            <input type="number" name="arrival[]" x-model="proc.arrival" placeholder="Arrival Time" min="0" required style="flex: 1;">
+                            <input type="number" name="burst[]" x-model="proc.burst" placeholder="Burst Time" min="1" required style="flex: 1;">
+                            
+                            <input type="number" name="priority[]" x-model="proc.priority" placeholder="Priority" min="1" 
+                                   x-show="algo === 'priority_np'" 
+                                   :required="algo === 'priority_np'" style="flex: 1;">
                             
                             <button type="button" class="btn-remove" @click="processes.splice(index, 1)" x-show="processes.length > 1" title="Hapus baris">✕</button>
                         </div>
                     </template>
                     
-                    <button type="button" class="btn-add" @click="processes.push({arrival: '', burst: ''})">+ Tambah Proses</button>
+                    <button type="button" class="btn-add" @click="processes.push({arrival: '', burst: '', priority: ''})" style="margin-top: 8px;">+ Tambah Proses</button>
                 </div>
 
                 <button type="submit" class="btn-solve">Solve</button>
@@ -46,21 +47,17 @@
         </div>
 
         <div class="card output-card">
-        <div class="output-header">
-            <h2>Output</h2>
-            <span class="badge">
-                {% if algoritma_terpilih == 'rr' %}
-                    Round Robin (RR)
-                {% else %}
-                    FCFS
-                {% endif %}
-            </span>
-        </div>
+            <div class="output-header">
+                <h2>Output</h2>
+                <span class="badge" x-text="algo === 'fcfs' ? 'FCFS' : (algo === 'sjf' ? 'SJF NON-PREEMPTIVE' : 'PRIORITY NON-PREEMPTIVE')"></span>
+            </div>
 
             {% if hasil == "error_len" %}
                 <p class="error-msg">Error: Jumlah elemen Waktu Kedatangan dan Durasi harus sama!</p>
+            {% elif hasil == "error_priority_len" %}
+                <p class="error-msg">Error: Kolom data Prioritas wajib diisi untuk algoritma ini!</p>
             {% elif hasil == "error_val" %}
-                <p class="error-msg">Error: Tolong masukkan format angka yang dipisahkan spasi saja.</p>
+                <p class="error-msg">Error: Masukkan hanya format angka bulat positif saja.</p>
             {% elif hasil %}
                 <div class="gantt-section">
                     <h3>Gantt Chart</h3>
@@ -80,35 +77,44 @@
                     </div>
                 </div>
 
-                <table class="result-table">
-                    <thead>
-                        <tr>
-                            <th>Job</th>
-                            <th>Arrival Time</th>
-                            <th>Burst Time</th>
-                            <th>Finish Time</th>
-                            <th>Turnaround Time</th>
-                            <th>Waiting Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in hasil %}
-                        <tr>
-                            <td>{{ p.id }}</td>
-                            <td>{{ p.arrival_time }}</td>
-                            <td>{{ p.burst_time }}</td>
-                            <td>{{ p.finish_time }}</td>
-                            <td>{{ p.turnaround_time }}</td>
-                            <td>{{ p.waiting_time }}</td>
-                        </tr>
-                        {% endfor %}
-                        <tr class="row-average">
-                            <td colspan="4" style="text-align: right; font-weight: bold;">Average</td>
-                            <td>{{ rata_tat }}</td>
-                            <td>{{ rata_wt }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div x-data='{ tableData: {{ hasil | tojson | safe }} }'>
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                <th>Job</th>
+                                <th>Arrival Time</th>
+                                <th>Burst Time</th>
+                                <template x-if="algo === 'priority_np'">
+                                    <th>Priority</th>
+                                </template>
+                                <th>Finish Time</th>
+                                <th>Turnaround Time</th>
+                                <th>Waiting Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="row in tableData" :key="row.id">
+                                <tr>
+                                    <td x-text="row.id"></td>
+                                    <td x-text="row.arrival_time"></td>
+                                    <td x-text="row.burst_time"></td>
+                                    <template x-if="algo === 'priority_np'">
+                                        <td x-text="row.priority"></td>
+                                    </template>
+                                    <td x-text="row.finish_time"></td>
+                                    <td x-text="row.turnaround_time"></td>
+                                    <td x-text="row.waiting_time"></td>
+                                </tr>
+                            </template>
+                            
+                            <tr class="row-average">
+                                <td :colspan="algo === 'priority_np' ? 4 : 3" style="text-align: right; font-weight: bold;">Average</td>
+                                <td>{{ rata_tat }}</td>
+                                <td>{{ rata_wt }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                 
                 <div class="metrics-summary">
                     <p><strong>Throughput:</strong> {{ throughput }} proses per satuan waktu.</p>
