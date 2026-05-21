@@ -10,7 +10,7 @@
 <body>
     <div class="container" x-data="{ algo: '{{ selected_algo }}' }">
         <div class="card input-card">
-            <h2>Input (Non-Preemptive Focus)</h2>
+            <h2>Input Parameters</h2>
             <form method="POST" x-data='{ processes: {{ inputs_json | safe }} }'>
                 <div class="form-group">
                     <label for="algorithm">Algorithm</label>
@@ -18,7 +18,13 @@
                         <option value="fcfs">First Come First Serve, FCFS</option>
                         <option value="sjf">SJF Non-Preemptive</option>
                         <option value="priority_np">Priority Non-Preemptive</option>
+                        <option value="rr">Round Robin, RR (Preemptive)</option>
                     </select>
+                </div>
+
+                <div class="form-group" x-show="algo === 'rr'" x-transition style="margin-bottom: 15px;">
+                    <label for="quantum">Time Quantum</label>
+                    <input type="number" id="quantum" name="quantum" value="{{ quantum }}" min="1" :required="algo === 'rr'" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
 
                 <div class="form-group">
@@ -49,7 +55,7 @@
         <div class="card output-card">
             <div class="output-header">
                 <h2>Output</h2>
-                <span class="badge" x-text="algo === 'fcfs' ? 'FCFS' : (algo === 'sjf' ? 'SJF NON-PREEMPTIVE' : 'PRIORITY NON-PREEMPTIVE')"></span>
+                <span class="badge" x-text="algo === 'fcfs' ? 'FCFS' : (algo === 'sjf' ? 'SJF NON-PREEMPTIVE' : (algo === 'priority_np' ? 'PRIORITY NON-PREEMPTIVE' : 'ROUND ROBIN'))"></span>
             </div>
 
             {% if hasil == "error_len" %}

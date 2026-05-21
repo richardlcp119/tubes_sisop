@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request
 import json
-import json
 from algoritma.fcfs import hitung_fcfs
 from algoritma.sjf_np import hitung_sjf
 from algoritma.priorityscheduling_np import hitung_priority
@@ -15,8 +14,9 @@ def index():
     rata_tat = 0
     rata_wt = 0
     throughput = 0
+    quantum = 2  # Nilai default awal Quantum
     
-    # State awal: Menambahkan struktur "priority" pada objek data baris awal
+    # State awal untuk baris input dinamis komponen Alpine
     inputs_json = '[{"arrival": "", "burst": "", "priority": ""}]'
     selected_algo = 'fcfs'
 
@@ -24,13 +24,17 @@ def index():
         try:
             selected_algo = request.form.get('algorithm', 'fcfs')
             
+            # Ambil nilai quantum khusus untuk algoritma Round Robin
+            quantum_raw = request.form.get('quantum', '2')
+            if quantum_raw.strip() != '':
+                quantum = int(quantum_raw)
+            
             # Ambil data input array list dari komponen dinamis HTML
             arrival_raw = request.form.getlist('arrival[]')
             burst_raw = request.form.getlist('burst[]')
             priority_raw = request.form.getlist('priority[]')
             
             # Ikat balik semua input ke objek JSON agar data komponen Alpine tidak hilang pasca-POST
-            # Satukan ketiga list (arrival, burst, priority) menggunakan zip_longest atau gunakan indeks i
             inputs_data = [
                 {
                     'arrival': a, 
@@ -58,6 +62,9 @@ def index():
                         hasil, gantt, rata_tat, rata_wt, throughput = hitung_priority(arrival_times, burst_times, priority_times)
                     else:
                         hasil = "error_priority_len"
+                elif selected_algo == 'rr':
+                    # Jalankan fungsi hitung Round Robin
+                    hasil, gantt, rata_tat, rata_wt, throughput = hitung_rr(arrival_times, burst_times, quantum)
             else:
                 hasil = "error_len"
         except ValueError:
@@ -66,7 +73,7 @@ def index():
     return render_template('index.html', hasil=hasil, gantt=gantt, 
                            rata_tat=rata_tat, rata_wt=rata_wt, 
                            throughput=throughput, inputs_json=inputs_json,
-                           selected_algo=selected_algo)
+                           selected_algo=selected_algo, quantum=quantum)
 
 if __name__ == '__main__':
     app.run(debug=True)
