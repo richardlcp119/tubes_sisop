@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Process Scheduling Solver</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -42,17 +43,18 @@
             {% elif hasil %}
                 <div class="gantt-section">
                     <h3>Gantt Chart</h3>
-                    <div class="gantt-container">
+                    <div class="gantt-container" x-data='{ "ganttData": {{ gantt | tojson | safe }} }'>
                         <div class="gantt-timeline">
-                            {% for block in gantt %}
-                                <div class="gantt-block" style="flex-grow: {{ block.end - block.start }};">
-                                    <span class="block-id">{{ block.id }}</span>
-                                    <span class="time-start">{{ block.start }}</span>
-                                    {% if loop.last %}
-                                        <span class="time-end">{{ block.end }}</span>
-                                    {% endif %}
+                            <template x-for="(block, index) in ganttData" :key="index">
+                                <div class="gantt-block" :style="`flex-grow: ${block.end - block.start}`">
+                                    <span class="block-id" x-text="block.id"></span>
+                                    <span class="time-start" x-text="block.start"></span>
+                                    
+                                    <template x-if="index === ganttData.length - 1">
+                                        <span class="time-end" x-text="block.end"></span>
+                                    </template>
                                 </div>
-                            {% endfor %}
+                            </template>
                         </div>
                     </div>
                 </div>
