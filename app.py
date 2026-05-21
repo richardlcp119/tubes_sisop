@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
-import json  # Tambahkan import ini
+import json
 from algoritma.fcfs import hitung_fcfs
+from algoritma.sjf_np import hitung_sjf
+from algoritma.priorityscheduling_np import hitung_priority
 
 app = Flask(__name__)
 
@@ -12,25 +14,48 @@ def index():
     rata_wt = 0
     throughput = 0
     
-    # State awal: 1 baris input kosong
-    inputs_json = '[{"arrival": "", "burst": ""}]'
+    # State awal: Menambahkan struktur "priority" pada objek data baris awal
+    inputs_json = '[{"arrival": "", "burst": "", "priority": ""}]'
+    selected_algo = 'fcfs'
 
     if request.method == 'POST':
         try:
-            # Ambil data input array (kolom ganda) dari HTML
+            selected_algo = request.form.get('algorithm', 'fcfs')
+            
+            # Ambil data input array list dari komponen dinamis HTML
             arrival_raw = request.form.getlist('arrival[]')
             burst_raw = request.form.getlist('burst[]')
+            priority_raw = request.form.getlist('priority[]')
             
-            # Ubah data mentah menjadi JSON agar inputan user tidak hilang saat direfresh
-            inputs_data = [{'arrival': a, 'burst': b} for a, b in zip(arrival_raw, burst_raw)]
+            # Ikat balik semua input ke objek JSON agar data komponen Alpine tidak hilang pasca-POST
+            # Satukan ketiga list (arrival, burst, priority) menggunakan zip_longest atau gunakan indeks i
+            inputs_data = [
+                {
+                    'arrival': a, 
+                    'burst': b, 
+                    'priority': priority_raw[i] if i < len(priority_raw) else ""
+                } 
+                for i, (a, b) in enumerate(zip(arrival_raw, burst_raw))
+            ]
             inputs_json = json.dumps(inputs_data)
 
-            # Konversi teks ke angka (hanya proses data yang tidak kosong)
+            # Konversi elemen teks array ke list data integer (abaikan string kosong)
             arrival_times = [int(x) for x in arrival_raw if x.strip() != '']
             burst_times = [int(x) for x in burst_raw if x.strip() != '']
+            priority_times = [int(x) for x in priority_raw if x.strip() != '']
 
+            # Validasi panjang array dasar
             if len(arrival_times) == len(burst_times) and len(arrival_times) > 0:
-                hasil, gantt, rata_tat, rata_wt, throughput = hitung_fcfs(arrival_times, burst_times)
+                if selected_algo == 'fcfs':
+                    hasil, gantt, rata_tat, rata_wt, throughput = hitung_fcfs(arrival_times, burst_times)
+                elif selected_algo == 'sjf':
+                    hasil, gantt, rata_tat, rata_wt, throughput = hitung_sjf(arrival_times, burst_times)
+                elif selected_algo == 'priority_np':
+                    # Pastikan jumlah kolom input prioritas terisi lengkap
+                    if len(priority_times) == len(arrival_times):
+                        hasil, gantt, rata_tat, rata_wt, throughput = hitung_priority(arrival_times, burst_times, priority_times)
+                    else:
+                        hasil = "error_priority_len"
             else:
                 hasil = "error_len"
         except ValueError:
@@ -38,7 +63,8 @@ def index():
 
     return render_template('index.html', hasil=hasil, gantt=gantt, 
                            rata_tat=rata_tat, rata_wt=rata_wt, 
-                           throughput=throughput, inputs_json=inputs_json)
+                           throughput=throughput, inputs_json=inputs_json,
+                           selected_algo=selected_algo)
 
 if __name__ == '__main__':
     app.run(debug=True)
