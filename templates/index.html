@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Scheduling Solver</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="card input-card">
+            <h2>Input</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="algorithm">Algorithm</label>
+                    <select id="algorithm" name="algorithm">
+                        <option value="fcfs">First Come First Serve, FCFS</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="arrival_times">Arrival Times</label>
+                    <input type="text" id="arrival_times" name="arrival_times" placeholder="Contoh: 2 4 6" value="{{ inputs.arrival }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="burst_times">Burst Times</label>
+                    <input type="text" id="burst_times" name="burst_times" placeholder="Contoh: 2 4 2" value="{{ inputs.burst }}" required>
+                </div>
+                <button type="submit" class="btn-solve">Solve</button>
+            </form>
+        </div>
+
+        <div class="card output-card">
+            <div class="output-header">
+                <h2>Output</h2>
+                <span class="badge">FCFS</span>
+            </div>
+
+            {% if hasil == "error_len" %}
+                <p class="error-msg">Error: Jumlah elemen Waktu Kedatangan dan Durasi harus sama!</p>
+            {% elif hasil == "error_val" %}
+                <p class="error-msg">Error: Tolong masukkan format angka yang dipisahkan spasi saja.</p>
+            {% elif hasil %}
+                <div class="gantt-section">
+                    <h3>Gantt Chart</h3>
+                    <div class="gantt-container">
+                        <div class="gantt-timeline">
+                            {% for block in gantt %}
+                                <div class="gantt-block" style="flex-grow: {{ block.end - block.start }};">
+                                    <span class="block-id">{{ block.id }}</span>
+                                    <span class="time-start">{{ block.start }}</span>
+                                    {% if loop.last %}
+                                        <span class="time-end">{{ block.end }}</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th>Job</th>
+                            <th>Arrival Time</th>
+                            <th>Burst Time</th>
+                            <th>Finish Time</th>
+                            <th>Turnaround Time</th>
+                            <th>Waiting Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in hasil %}
+                        <tr>
+                            <td>{{ p.id }}</td>
+                            <td>{{ p.arrival_time }}</td>
+                            <td>{{ p.burst_time }}</td>
+                            <td>{{ p.finish_time }}</td>
+                            <td>{{ p.turnaround_time }}</td>
+                            <td>{{ p.waiting_time }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="row-average">
+                            <td colspan="4" style="text-align: right; font-weight: bold;">Average</td>
+                            <td>{{ rata_tat }}</td>
+                            <td>{{ rata_wt }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="metrics-summary">
+                    <p><strong>Throughput:</strong> {{ throughput }} proses per satuan waktu.</p>
+                </div>
+            {% else %}
+                <p class="placeholder-text">Masukkan data parameter proses di bilah kiri, kemudian klik tombol Solve.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

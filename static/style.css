@@ -1,0 +1,212 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f3f4f6;
+    color: #1f2937;
+    padding: 50px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    display: flex;
+    gap: 30px;
+    max-width: 1100px;
+    width: 100%;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 35px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.input-card {
+    flex: 1;
+    max-width: 340px;
+    height: fit-content;
+}
+
+.output-card {
+    flex: 2;
+}
+
+h2 {
+    font-size: 26px;
+    margin-bottom: 25px;
+    color: #111827;
+}
+
+h3 {
+    font-size: 15px;
+    color: #4b5563;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #4b5563;
+}
+
+select, input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #f9fafb;
+}
+
+select:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background-color: #fff;
+}
+
+.btn-solve {
+    width: 100%;
+    padding: 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-solve:hover {
+    background-color: #2563eb;
+}
+
+.output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.badge {
+    background-color: #ecfdf5;
+    color: #047857;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+/* Gantt Chart */
+.gantt-section {
+    margin-bottom: 40px;
+}
+
+.gantt-container {
+    display: flex;
+    justify-content: center;
+}
+
+.gantt-timeline {
+    display: flex;
+    width: 100%;
+    max-width: 550px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #fff;
+    overflow: visible;
+}
+
+.gantt-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #cbd5e1;
+    padding: 20px 0;
+    position: relative;
+    background-color: #f8fafc;
+}
+
+.gantt-block:last-child {
+    border-right: none;
+}
+
+.block-id {
+    font-weight: 600;
+    color: #334155;
+}
+
+.time-start {
+    position: absolute;
+    bottom: -24px;
+    left: -4px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.time-end {
+    position: absolute;
+    bottom: -24px;
+    right: -4px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* Tabel Desain */
+.result-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+    font-size: 14px;
+}
+
+.result-table th, .result-table td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.result-table th {
+    background-color: #f9fafb;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.row-average td {
+    border-top: 2px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+.error-msg {
+    color: #b91c1c;
+    background-color: #fef2f2;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.placeholder-text {
+    color: #9ca3af;
+    text-align: center;
+    margin-top: 50px;
+    font-style: italic;
+}
+
+.metrics-summary {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #6b7280;
+}
