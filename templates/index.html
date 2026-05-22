@@ -16,8 +16,8 @@
                     <label for="algorithm">Algorithm</label>
                     <select id="algorithm" name="algorithm" x-model="algo">
                         <option value="fcfs">First Come First Serve, FCFS</option>
-                        <option value="sjf">Rahma Belum Ngerjain (?)</option>
-                        <option value="sjf">SJF Non-Preemptive</option>
+                        <option value="sjf_p">Shortest Job First, SJF (Preemptive)</option>
+                        <option value="sjf">Shortest Job First, SJF (Non-Preemptive)</option> 
                         <option value="priority_p">Priority Preemptive</option>
                         <option value="priority_np">Priority Non-Preemptive</option>
                         <option value="rr">Round Robin, RR (Preemptive)</option>
@@ -57,7 +57,14 @@
         <div class="card output-card">
             <div class="output-header">
                 <h2>Output</h2>
-                <span class="badge" x-text="algo === 'fcfs' ? 'FCFS' : (algo === 'sjf' ? 'SJF NON-PREEMPTIVE' : (algo === 'priority_np' ? 'PRIORITY NON-PREEMPTIVE' : (algo === 'priority_p' ? 'PRIORITY PREEMPTIVE' : 'ROUND ROBIN')))"></span>
+                <span class="badge" x-text="
+                    algo === 'fcfs' ? 'FCFS' : 
+                    (algo === 'sjf_p' ? 'SJF PREEMPTIVE' : 
+                    (algo === 'sjf' || algo === 'sjf_np' ? 'SJF NON-PREEMPTIVE' : 
+                    (algo === 'priority_np' ? 'PRIORITY NON-PREEMPTIVE' : 
+                    (algo === 'priority_p' ? 'PRIORITY PREEMPTIVE' : 
+                    'ROUND ROBIN')))))">
+                </span>
             </div>
 
             {% if hasil == "error_len" %}

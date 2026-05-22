@@ -5,6 +5,8 @@ from algoritma.sjf_np import hitung_sjf
 from algoritma.priorityscheduling_np import hitung_priority
 from algoritma.rr import hitung_rr  
 from algoritma.priorityscheduling_p import hitung_priority_preemptive
+# TAMBAHAN: Import algoritma SJF Preemptive (pastikan nama file sesuai)
+from algoritma.sjf_p import hitung_sjf_preemptive
 
 app = Flask(__name__)
 
@@ -55,8 +57,14 @@ def index():
             if len(arrival_times) == len(burst_times) and len(arrival_times) > 0:
                 if selected_algo == 'fcfs':
                     hasil, gantt, rata_tat, rata_wt, throughput = hitung_fcfs(arrival_times, burst_times)
+                
                 elif selected_algo == 'sjf':
                     hasil, gantt, rata_tat, rata_wt, throughput = hitung_sjf(arrival_times, burst_times)
+                
+                # TAMBAHAN: Blok logika untuk SJF Preemptive (SRTF)
+                elif selected_algo == 'sjf_p':
+                    hasil, gantt, rata_tat, rata_wt, throughput = hitung_sjf_preemptive(arrival_times, burst_times)
+                    
                 elif selected_algo == 'priority_np':
                     # Pastikan jumlah kolom input prioritas terisi lengkap
                     if len(priority_times) == len(arrival_times):
@@ -64,7 +72,6 @@ def index():
                     else:
                         hasil = "error_priority_len"
                         
-                # TAMBAHAN: Blok logika untuk Priority Scheduling Preemptive
                 elif selected_algo == 'priority_p':
                     if len(priority_times) == len(arrival_times):
                         hasil, gantt, rata_tat, rata_wt, throughput = hitung_priority_preemptive(arrival_times, burst_times, priority_times)
