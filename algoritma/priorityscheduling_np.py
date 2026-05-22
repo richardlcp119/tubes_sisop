@@ -1,4 +1,4 @@
-def hitung_priority_preemptive(arrival_times, burst_times, priorities):
+def hitung_priority(arrival_times, burst_times, priorities):
     n = len(arrival_times)
     proses = []
     
@@ -7,21 +7,13 @@ def hitung_priority_preemptive(arrival_times, burst_times, priorities):
             'id': f'P{i+1}',
             'arrival_time': arrival_times[i],
             'burst_time': burst_times[i],
-            'remaining_time': burst_times[i], # Tambahan: Menyimpan sisa waktu eksekusi
             'priority': priorities[i],
-            'is_completed': False,
-            'finish_time': 0,
-            'turnaround_time': 0,
-            'waiting_time': 0
+            'is_completed': False
         })
     
     waktu_sekarang = 0
     selesai = 0
     gantt_chart = []
-    
-    # Variabel tambahan untuk melacak history proses pada Gantt Chart
-    proses_sebelumnya = None
-    start_time_gantt = 0
     
     while selesai < n:
         # Ambil proses yang sudah tiba dan belum selesai
@@ -30,53 +22,26 @@ def hitung_priority_preemptive(arrival_times, burst_times, priorities):
         if eligible:
             # Urutkan berdasarkan Prioritas Tertinggi (Angka Terkecil), lalu Arrival Time
             eligible.sort(key=lambda x: (x['priority'], x['arrival_time']))
-            p_terpilih = eligible[0]
+            p = eligible[0]
             
-            # Jika proses yang dieksekusi berubah (Context Switch), simpan ke Gantt Chart
-            if proses_sebelumnya != p_terpilih['id']:
-                if proses_sebelumnya is not None:
-                    gantt_chart.append({
-                        'id': proses_sebelumnya,
-                        'start': start_time_gantt,
-                        'end': waktu_sekarang
-                    })
-                start_time_gantt = waktu_sekarang
-                proses_sebelumnya = p_terpilih['id']
+            start_time = waktu_sekarang
+            p['finish_time'] = start_time + p['burst_time']
+            p['turnaround_time'] = p['finish_time'] - p['arrival_time']
+            p['waiting_time'] = p['turnaround_time'] - p['burst_time']
+            p['is_completed'] = True
             
-            # Eksekusi proses terpilih selama 1 satuan waktu (Preemptive)
-            p_terpilih['remaining_time'] -= 1
-            waktu_sekarang += 1
+            gantt_chart.append({
+                'id': p['id'],
+                'start': start_time,
+                'end': p['finish_time']
+            })
             
-            # Jika proses sudah selesai
-            if p_terpilih['remaining_time'] == 0:
-                p_terpilih['is_completed'] = True
-                selesai += 1
-                
-                # Kalkulasi waktu untuk proses yang selesai
-                p_terpilih['finish_time'] = waktu_sekarang
-                p_terpilih['turnaround_time'] = p_terpilih['finish_time'] - p_terpilih['arrival_time']
-                p_terpilih['waiting_time'] = p_terpilih['turnaround_time'] - p_terpilih['burst_time']
+            waktu_sekarang = p['finish_time']
+            selesai += 1
         else:
-            # Jika tidak ada proses yang siap (CPU Idle)
-            if proses_sebelumnya is not None:
-                gantt_chart.append({
-                    'id': proses_sebelumnya,
-                    'start': start_time_gantt,
-                    'end': waktu_sekarang
-                })
-                proses_sebelumnya = None
-            
-            waktu_sekarang += 1
+            pending = [p for p in proses if not p['is_completed']]
+            waktu_sekarang = min(p['arrival_time'] for p in pending)
 
-    # Masukkan proses terakhir ke dalam Gantt Chart setelah loop selesai
-    if proses_sebelumnya is not None:
-        gantt_chart.append({
-            'id': proses_sebelumnya,
-            'start': start_time_gantt,
-            'end': waktu_sekarang
-        })
-
-    # Kalkulasi rata-rata (Sama seperti Non-Preemptive)
     total_tat = sum(p['turnaround_time'] for p in proses)
     total_wt = sum(p['waiting_time'] for p in proses)
     
