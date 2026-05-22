@@ -4,6 +4,7 @@ from algoritma.fcfs import hitung_fcfs
 from algoritma.sjf_np import hitung_sjf
 from algoritma.priorityscheduling_np import hitung_priority
 from algoritma.rr import hitung_rr  
+from algoritma.priorityscheduling_p import hitung_priority_preemptive
 
 app = Flask(__name__)
 
@@ -62,6 +63,14 @@ def index():
                         hasil, gantt, rata_tat, rata_wt, throughput = hitung_priority(arrival_times, burst_times, priority_times)
                     else:
                         hasil = "error_priority_len"
+                        
+                # TAMBAHAN: Blok logika untuk Priority Scheduling Preemptive
+                elif selected_algo == 'priority_p':
+                    if len(priority_times) == len(arrival_times):
+                        hasil, gantt, rata_tat, rata_wt, throughput = hitung_priority_preemptive(arrival_times, burst_times, priority_times)
+                    else:
+                        hasil = "error_priority_len"
+                        
                 elif selected_algo == 'rr':
                     # Jalankan fungsi hitung Round Robin
                     hasil, gantt, rata_tat, rata_wt, throughput = hitung_rr(arrival_times, burst_times, quantum)

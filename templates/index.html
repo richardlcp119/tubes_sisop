@@ -16,7 +16,9 @@
                     <label for="algorithm">Algorithm</label>
                     <select id="algorithm" name="algorithm" x-model="algo">
                         <option value="fcfs">First Come First Serve, FCFS</option>
+                        <option value="sjf">Rahma Belum Ngerjain (?)</option>
                         <option value="sjf">SJF Non-Preemptive</option>
+                        <option value="priority_p">Priority Preemptive</option>
                         <option value="priority_np">Priority Non-Preemptive</option>
                         <option value="rr">Round Robin, RR (Preemptive)</option>
                     </select>
@@ -38,8 +40,8 @@
                             <input type="number" name="burst[]" x-model="proc.burst" placeholder="Burst Time" min="1" required style="flex: 1;">
                             
                             <input type="number" name="priority[]" x-model="proc.priority" placeholder="Priority" min="1" 
-                                   x-show="algo === 'priority_np'" 
-                                   :required="algo === 'priority_np'" style="flex: 1;">
+                                   x-show="algo === 'priority_np' || algo === 'priority_p'" 
+                                   :required="algo === 'priority_np' || algo === 'priority_p'" style="flex: 1;">
                             
                             <button type="button" class="btn-remove" @click="processes.splice(index, 1)" x-show="processes.length > 1" title="Hapus baris">✕</button>
                         </div>
@@ -55,7 +57,7 @@
         <div class="card output-card">
             <div class="output-header">
                 <h2>Output</h2>
-                <span class="badge" x-text="algo === 'fcfs' ? 'FCFS' : (algo === 'sjf' ? 'SJF NON-PREEMPTIVE' : (algo === 'priority_np' ? 'PRIORITY NON-PREEMPTIVE' : 'ROUND ROBIN'))"></span>
+                <span class="badge" x-text="algo === 'fcfs' ? 'FCFS' : (algo === 'sjf' ? 'SJF NON-PREEMPTIVE' : (algo === 'priority_np' ? 'PRIORITY NON-PREEMPTIVE' : (algo === 'priority_p' ? 'PRIORITY PREEMPTIVE' : 'ROUND ROBIN')))"></span>
             </div>
 
             {% if hasil == "error_len" %}
@@ -90,7 +92,7 @@
                                 <th>Job</th>
                                 <th>Arrival Time</th>
                                 <th>Burst Time</th>
-                                <template x-if="algo === 'priority_np'">
+                                <template x-if="algo === 'priority_np' || algo === 'priority_p'">
                                     <th>Priority</th>
                                 </template>
                                 <th>Finish Time</th>
@@ -104,7 +106,7 @@
                                     <td x-text="row.id"></td>
                                     <td x-text="row.arrival_time"></td>
                                     <td x-text="row.burst_time"></td>
-                                    <template x-if="algo === 'priority_np'">
+                                    <template x-if="algo === 'priority_np' || algo === 'priority_p'">
                                         <td x-text="row.priority"></td>
                                     </template>
                                     <td x-text="row.finish_time"></td>
@@ -114,7 +116,7 @@
                             </template>
                             
                             <tr class="row-average">
-                                <td :colspan="algo === 'priority_np' ? 4 : 3" style="text-align: right; font-weight: bold;">Average</td>
+                                <td :colspan="(algo === 'priority_np' || algo === 'priority_p') ? 4 : 3" style="text-align: right; font-weight: bold;">Average</td>
                                 <td>{{ rata_tat }}</td>
                                 <td>{{ rata_wt }}</td>
                             </tr>
