@@ -115,7 +115,7 @@
                 <div class="error-msg"><i data-lucide="alert-circle"></i> Priority must be filled for Priority Algorithms.</div>
             {% elif hasil %}
                 
-               <!-- Gantt Chart -->
+              <!-- Gantt Chart -->
                 <div class="card" x-data='{ 
                         ganttData: {{ gantt | tojson | safe }}, 
                         currentStep: {{ gantt | length }},
@@ -192,42 +192,57 @@
                     </div>
                 </div>
 
-                <!-- Metrics -->
+              <!-- Metrics -->
                 <div class="metrics-grid">
                     <div class="metric-box wt">
-                        <div class="metric-label">Waiting Time</div>
+                        <div class="metric-label">
+                            AVG WAITING TIME<br>
+                            <span style="font-size: 10px; text-transform: none; font-weight: 500; opacity: 0.8;">(Avg WT)</span>
+                        </div>
                         <div class="metric-value">{{ rata_wt }}</div>
                     </div>
                     <div class="metric-box tat">
-                        <div class="metric-label">Turnaround</div>
+                        <div class="metric-label">
+                            AVG TURNAROUND<br>
+                            <span style="font-size: 10px; text-transform: none; font-weight: 500; opacity: 0.8;">(Avg TAT)</span>
+                        </div>
                         <div class="metric-value">{{ rata_tat }}</div>
                     </div>
                     <div class="metric-box throughput">
-                        <div class="metric-label">Throughput</div>
+                        <div class="metric-label">
+                            THROUGHPUT<br>
+                            <span style="font-size: 10px; text-transform: none; font-weight: 500; opacity: 0.8;">(Process/Time)</span>
+                        </div>
                         <div class="metric-value">{{ throughput }}</div>
                     </div>
                     <div class="metric-box quantum" x-show="algo === 'rr'">
-                        <div class="metric-label">Quantum</div>
+                        <div class="metric-label">
+                            TIME QUANTUM<br>
+                            <span style="font-size: 10px; text-transform: none; font-weight: 500; opacity: 0.8;">(TQ)</span>
+                        </div>
                         <div class="metric-value">{{ quantum }}</div>
                     </div>
                 </div>
-
-                <!-- Process Details -->
+                
+         <!-- Process Details -->
                 <div class="card" x-data='{ tableData: {{ hasil | tojson | safe }} }'>
                     <div class="card-header"><i data-lucide="table-2"></i> Metrics Detail</div>
                     <table class="ios-table">
                         <thead>
                             <tr>
                                 <th style="text-align: left;">PROCESS</th>
-                                <th>AT</th>
-                                <th>BT</th>
-                                <template x-if="algo.includes('priority')"><th>PRI</th></template>
-                                <th>CT</th>
-                                <th>TAT</th>
-                                <th>WT</th>
+                                <th>ARRIVAL TIME<br><span style="font-size: 10px; color: var(--text-muted);">(AT)</span></th>
+                                <th>BURST TIME<br><span style="font-size: 10px; color: var(--text-muted);">(BT)</span></th>
+                                <template x-if="algo.includes('priority')">
+                                    <th>PRIORITY<br><span style="font-size: 10px; color: var(--text-muted);">(PRI)</span></th>
+                                </template>
+                                <th>COMPLETION TIME<br><span style="font-size: 10px; color: var(--text-muted);">(CT)</span></th>
+                                <th>TURNAROUND TIME<br><span style="font-size: 10px; color: var(--text-muted);">(TAT)</span></th>
+                                <th>WAITING TIME<br><span style="font-size: 10px; color: var(--text-muted);">(WT)</span></th>
                             </tr>
                         </thead>
                         <tbody>
+                            
                             <template x-for="row in tableData" :key="row.id">
                                 <tr>
                                     <td style="text-align: left; font-weight: 600;">
@@ -246,15 +261,15 @@
                     </table>
                 </div>
 
-                <!-- Compare Algorithms -->
+              <!-- Compare Algorithms -->
                 <div class="card">
                     <div class="card-header"><i data-lucide="layers"></i> Compare Algorithms</div>
                     <table class="ios-table">
                         <thead>
                             <tr>
                                 <th style="text-align: left;">ALGORITHM</th>
-                                <th>AVG TAT</th>
-                                <th>AVG WT</th>
+                                <th>AVERAGE TURNAROUND<br><span style="font-size: 10px; color: var(--text-muted);">(Avg TAT)</span></th>
+                                <th>AVERAGE WAITING<br><span style="font-size: 10px; color: var(--text-muted);">(Avg WT)</span></th>
                             </tr>
                         </thead>
                         <tbody>
