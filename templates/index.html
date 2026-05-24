@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CPU Scheduling Simulator</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -13,7 +12,6 @@
         algo: '{{ selected_algo }}',
         darkMode: localStorage.getItem('theme') === 'dark',
         getColor(id) {
-            /* iOS System Colors for Gantt Chart */
             const colors = ['#007AFF', '#34C759', '#FF9500', '#AF52DE', '#FF2D55', '#5856D6'];
             if (id === 'Idle' || id === 'idle') return '#8E8E93';
             let numId = parseInt(id.replace('P', '')) - 1;
@@ -23,18 +21,20 @@
     :class="{ 'dark': darkMode }" 
     x-init="$watch('darkMode', val => localStorage.setItem('theme', val ? 'dark' : 'light'))">
 
+    <!-- Ambient Gradient Background -->
+    <div class="ambient-bg">
+        <div class="orb-1"></div>
+        <div class="orb-2"></div>
+    </div>
+
+    <!-- Header dengan Gradien Apple dan Deskripsi Tugas -->
     <div class="app-header">
-        <h1>CPU Scheduling</h1>
-        <p>Interactive visualization of scheduling algorithms.</p>
+        <h1 class="text-gradient">CPU Scheduling Simulator</h1>
+        <div class="subtitle">by Kelompok 1</div>
+        <p class="desc">Implementasi dan Analisis Penjadwalan Menggunakan Algoritma CPU Scheduling.</p>
         
-        <!-- iOS Style Theme Toggle -->
         <button class="theme-toggle" @click="darkMode = !darkMode">
-            <template x-if="!darkMode">
-                <div style="display: flex; align-items: center; gap: 4px;"><i data-lucide="moon" style="width: 16px; height: 16px;"></i> Dark</div>
-            </template>
-            <template x-if="darkMode">
-                <div style="display: flex; align-items: center; gap: 4px;"><i data-lucide="sun" style="width: 16px; height: 16px;"></i> Light</div>
-            </template>
+            <span x-text="darkMode ? 'Dark' : 'Light'"></span>
         </button>
     </div>
 
@@ -46,64 +46,77 @@
                 <!-- Process Table -->
                 <div class="card">
                     <div class="card-header"><i data-lucide="list"></i> Process Table</div>
-                    <div class="process-list-header">
-                        <span>PID</span><span>AT</span><span>BT</span><span x-show="algo.includes('priority')">PRI</span><span></span>
+                    
+                    <!-- Grid akan otomatis membesar/mengecil berdasarkan algoritma yang dipilih -->
+                    <div class="process-list-header" :class="algo.includes('priority') ? 'grid-with-pri' : 'grid-without-pri'">
+                        <span>PID</span>
+                        <span style="line-height: 1.2;">ARRIVAL<br><span style="font-size: 9px; opacity: 0.7;">(AT)</span></span>
+                        <span style="line-height: 1.2;">BURST<br><span style="font-size: 9px; opacity: 0.7;">(BT)</span></span>
+                        
+                        <template x-if="algo.includes('priority')">
+                            <span style="line-height: 1.2;">PRIORITY<br><span style="font-size: 9px; opacity: 0.7;">(PRI)</span></span>
+                        </template>
+                        <span></span>
                     </div>
 
                     <template x-for="(proc, index) in processes" :key="index">
-                        <div class="process-row">
+                        <div class="process-row" :class="algo.includes('priority') ? 'grid-with-pri' : 'grid-without-pri'">
                             <div class="process-id">
                                 <span class="process-dot" :style="`background-color: ${getColor('P' + (index+1))};`"></span>
                                 <span x-text="`P${index + 1}`"></span>
                             </div>
                             <input type="number" name="arrival[]" x-model="proc.arrival" class="styled-input" min="0" required>
                             <input type="number" name="burst[]" x-model="proc.burst" class="styled-input" min="1" required>
-                            <input type="number" name="priority[]" x-model="proc.priority" class="styled-input" min="1" 
-                                   x-show="algo.includes('priority')" :required="algo.includes('priority')">
                             
-                            <!-- Inline SVG for Dynamic Remove Button -->
+                            <template x-if="algo.includes('priority')">
+                                <input type="number" name="priority[]" x-model="proc.priority" class="styled-input" min="1" required>
+                            </template>
+                            
                             <button type="button" class="btn-remove" @click="processes.splice(index, 1)" x-show="processes.length > 1">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                             </button>
                         </div>
                     </template>
                     
-                    <button type="button" class="btn-add" @click="processes.push({arrival: '', burst: '', priority: ''})">
+                    <button type="button" class="btn-add" @click="processes.push({arrival: '', burst: '', priority: '1'})">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                         Add Process
                     </button>
                 </div>
 
-                <!-- Algorithm Selector (iOS Segmented Controls) -->
+              <!-- Algorithm Selector -->
                 <div class="card">
                     <div class="card-header"><i data-lucide="settings-2"></i> Algorithm</div>
                     <input type="hidden" name="algorithm" :value="algo">
                     
+                    <!-- Baris 1: Basic Algorithms -->
                     <div class="algo-tabs">
-                        <div class="btn-algo" :class="algo === 'fcfs' ? 'active' : ''" @click="algo = 'fcfs'">FCFS</div>
-                        <div class="btn-algo" :class="algo === 'sjf' ? 'active' : ''" @click="algo = 'sjf'">SJF</div>
-                        <div class="btn-algo" :class="algo === 'rr' ? 'active' : ''" @click="algo = 'rr'">RR</div>
+                        <div class="btn-algo" :style="algo === 'fcfs' ? 'background: var(--ios-blue); color: white; font-weight: bold;' : ''" @click="algo = 'fcfs'">FCFS</div>
+                        <div class="btn-algo" :style="algo === 'rr' ? 'background: var(--ios-indigo); color: white; font-weight: bold;' : ''" @click="algo = 'rr'">Round Robin</div>
                     </div>
+                    
+                    <!-- Baris 2: Shortest Job First (SJF) -->
                     <div class="algo-tabs">
-                        <div class="btn-algo" :class="algo === 'sjf_p' ? 'active' : ''" @click="algo = 'sjf_p'">SJF (Preemptive)</div>
-                        <div class="btn-algo" :class="algo === 'priority_p' ? 'active' : ''" @click="algo = 'priority_p'">PRI (Preemptive)</div>
+                        <div class="btn-algo" :style="algo === 'sjf' ? 'background: var(--ios-green); color: white; font-weight: bold;' : ''" @click="algo = 'sjf'">SJF (Non-Preemptive)</div>
+                        <div class="btn-algo" :style="algo === 'sjf_p' ? 'background: var(--ios-orange); color: white; font-weight: bold;' : ''" @click="algo = 'sjf_p'">SJF (Preemptive)</div>
                     </div>
+                    
+                    <!-- Baris 3: Priority Scheduling -->
                     <div class="algo-tabs">
-                        <div class="btn-algo" :class="algo === 'priority_np' ? 'active' : ''" @click="algo = 'priority_np'">PRI (Non-Preemptive)</div>
+                        <div class="btn-algo" :style="algo === 'priority_np' ? 'background: var(--ios-purple); color: white; font-weight: bold;' : ''" @click="algo = 'priority_np'">PRI (Non-Preemptive)</div>
+                        <div class="btn-algo" :style="algo === 'priority_p' ? 'background: var(--ios-red); color: white; font-weight: bold;' : ''" @click="algo = 'priority_p'">PRI (Preemptive)</div>
                     </div>
 
+                    <!-- Input Time Quantum Khusus Round Robin -->
                     <div x-show="algo === 'rr'" x-transition style="margin-top: 15px;">
-                        <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 8px; font-weight: 500;">TIME QUANTUM</label>
+                        <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 8px; font-weight: 600;">TIME QUANTUM</label>
                         <input type="number" name="quantum" value="{{ quantum }}" class="styled-input" min="1" :required="algo === 'rr'">
                     </div>
                 </div>
 
-                <!-- Controls -->
-                <div class="card" style="padding: 10px;">
-                    <button type="submit" class="btn-action">
-                        <i data-lucide="play" style="fill: white;"></i> Start Simulation
-                    </button>
-                </div>
+                <button type="submit" class="btn-action" style="margin-bottom: 20px;">
+                    <i data-lucide="play" style="fill: white;"></i> Start Simulation
+                </button>
             </form>
         </div>
 
@@ -111,11 +124,11 @@
         <div>
             {% if hasil == "error_len" %}
                 <div class="error-msg"><i data-lucide="alert-circle"></i> Arrival and Burst elements must match.</div>
-            {% elif hasil == "error_priority_len" %}
-                <div class="error-msg"><i data-lucide="alert-circle"></i> Priority must be filled for Priority Algorithms.</div>
+            {% elif hasil == "error_val" %}
+                <div class="error-msg"><i data-lucide="alert-circle"></i> Invalid input value.</div>
             {% elif hasil %}
                 
-              <!-- Gantt Chart -->
+                <!-- Gantt Chart -->
                 <div class="card" x-data='{ 
                         ganttData: {{ gantt | tojson | safe }}, 
                         currentStep: {{ gantt | length }},
@@ -138,7 +151,6 @@
                         <div style="display: flex; align-items: center; gap: 8px;"><i data-lucide="bar-chart-horizontal"></i> Gantt Chart</div>
                         
                         <div class="gantt-controls">
-                            <!-- Inline SVGs for playback controls -->
                             <button type="button" @click="currentStep = 1; pause()" class="btn-icon" title="Reset">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
                             </button>
@@ -161,70 +173,60 @@
                         </div>
                     </div>
 
-                    <!-- Layout Gantt Chart yang Baru -->
-                    <div class="gantt-wrapper" style="padding: 10px 10px 40px 10px;"> <!-- Padding agar angka pinggir tidak terpotong -->
-                        
-                        <!-- 1. Baris Kotak Warna -->
-                        <div class="gantt-timeline-track" style="border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;">
+                    <div class="gantt-wrapper">
+                        <div class="gantt-timeline-track">
                             <template x-for="(block, index) in ganttData.slice(0, currentStep)" :key="index">
-                                <div class="gantt-block" :style="`flex-grow: ${block.end - block.start}; background-color: ${getColor(block.id)}; border-right: 1px solid rgba(255,255,255,0.4);`">
-                                    <span x-text="block.id" style="font-size: 16px; letter-spacing: 0.5px;"></span>
+                                <div class="gantt-block" :style="`flex-grow: ${block.end - block.start}; background-color: ${getColor(block.id)};`">
+                                    <span x-text="block.id"></span>
                                 </div>
                             </template>
                         </div>
                         
-                        <!-- 2. Baris Sumbu Angka Waktu -->
-                        <div style="display: flex; width: 100%; margin-top: 10px;">
+                        <div style="display: flex; width: 100%; margin-top: 8px;">
                             <template x-for="(block, index) in ganttData.slice(0, currentStep)" :key="index">
                                 <div :style="`flex-grow: ${block.end - block.start}; position: relative;`">
-                                    
-                                    <!-- Angka Waktu Mulai (Tepat di bawah garis pembatas kiri) -->
-                                    <span style="position: absolute; left: 0; transform: translateX(-50%); font-size: 16px; font-weight: 500; color: var(--text-main);" x-text="block.start"></span>
-                                    
-                                    <!-- Angka Waktu Selesai (Tepat di bawah garis paling kanan, HANYA dirender di blok terakhir) -->
+                                    <span style="position: absolute; left: 0; transform: translateX(-50%); font-size: 14px; font-weight: 600; color: var(--text-main);" x-text="block.start"></span>
                                     <template x-if="index === currentStep - 1">
-                                        <span style="position: absolute; right: 0; transform: translateX(50%); font-size: 16px; font-weight: 500; color: var(--text-main);" x-text="block.end"></span>
+                                        <span style="position: absolute; right: 0; transform: translateX(50%); font-size: 14px; font-weight: 600; color: var(--text-main);" x-text="block.end"></span>
                                     </template>
                                 </div>
                             </template>
                         </div>
-
                     </div>
                 </div>
 
-              <!-- Metrics -->
+               <!-- Metrics -->
                 <div class="metrics-grid">
                     <div class="metric-box wt">
-                        <div class="metric-label">
-                            AVG WAITING TIME<br>
-                            <span style="font-size: 10px; text-transform: none; font-weight: 500; opacity: 0.8;">(Avg WT)</span>
-                        </div>
+                        <div class="metric-label">AVG WAITING<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(Avg WT)</span></div>
                         <div class="metric-value">{{ rata_wt }}</div>
                     </div>
+                    
                     <div class="metric-box tat">
-                        <div class="metric-label">
-                            AVG TURNAROUND<br>
-                            <span style="font-size: 10px; text-transform: none; font-weight: 500; opacity: 0.8;">(Avg TAT)</span>
-                        </div>
+                        <div class="metric-label">AVG TURNAROUND<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(Avg TAT)</span></div>
                         <div class="metric-value">{{ rata_tat }}</div>
                     </div>
+                    
+                    <!-- Tambahan: Average Response Time -->
+                    <div class="metric-box rt">
+                        <div class="metric-label">AVG RESPONSE<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(Avg RT)</span></div>
+                        <!-- Menggunakan default('0') agar website tidak crash jika app.py belum mengirim variabel ini -->
+                        <div class="metric-value">{{ rata_rt | default('0') }}</div>
+                    </div>
+
                     <div class="metric-box throughput">
-                        <div class="metric-label">
-                            THROUGHPUT<br>
-                            <span style="font-size: 10px; text-transform: none; font-weight: 500; opacity: 0.8;">(Process/Time)</span>
-                        </div>
+                        <div class="metric-label">THROUGHPUT<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(Process/Time)</span></div>
                         <div class="metric-value">{{ throughput }}</div>
                     </div>
+
+
                     <div class="metric-box quantum" x-show="algo === 'rr'">
-                        <div class="metric-label">
-                            TIME QUANTUM<br>
-                            <span style="font-size: 10px; text-transform: none; font-weight: 500; opacity: 0.8;">(TQ)</span>
-                        </div>
+                        <div class="metric-label">TIME QUANTUM<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(TQ)</span></div>
                         <div class="metric-value">{{ quantum }}</div>
                     </div>
                 </div>
-                
-         <!-- Process Details -->
+
+                <!-- Process Details Table -->
                 <div class="card" x-data='{ tableData: {{ hasil | tojson | safe }} }'>
                     <div class="card-header"><i data-lucide="table-2"></i> Metrics Detail</div>
                     <table class="ios-table">
@@ -242,10 +244,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            
                             <template x-for="row in tableData" :key="row.id">
                                 <tr>
-                                    <td style="text-align: left; font-weight: 600;">
+                                    <td style="text-align: left; font-weight: 700;">
                                         <span class="process-dot" :style="`background-color: ${getColor(row.id)}; margin-right: 6px;`"></span>
                                         <span x-text="row.id"></span>
                                     </td>
@@ -261,31 +262,50 @@
                     </table>
                 </div>
 
-              <!-- Compare Algorithms -->
+                <!-- Algorithm Comparison Table -->
                 <div class="card">
-                    <div class="card-header"><i data-lucide="layers"></i> Compare Algorithms</div>
+                    <div class="card-header"><i data-lucide="trophy"></i> Algorithm Comparison</div>
                     <table class="ios-table">
                         <thead>
                             <tr>
-                                <th style="text-align: left;">ALGORITHM</th>
+                                <th style="text-align: left;">ALGORITHM (Ranked)</th>
                                 <th>AVERAGE TURNAROUND<br><span style="font-size: 10px; color: var(--text-muted);">(Avg TAT)</span></th>
                                 <th>AVERAGE WAITING<br><span style="font-size: 10px; color: var(--text-muted);">(Avg WT)</span></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for algo_name, data in comparison_data.items() %}
-                                <tr {% if (algo_name == 'FCFS' and selected_algo == 'fcfs') or 
-                                          (algo_name == 'SJF (Non-Preemptive)' and selected_algo == 'sjf') or 
-                                          (algo_name == 'SJF (Preemptive)' and selected_algo == 'sjf_p') or 
-                                          (algo_name == 'Priority (Non-Preemptive)' and selected_algo == 'priority_np') or 
-                                          (algo_name == 'Priority (Preemptive)' and selected_algo == 'priority_p') or 
-                                          ('Round Robin' in algo_name and selected_algo == 'rr') %}
-                                    style="background-color: var(--input-bg);"
-                                    {% endif %}>
+                            {% for algo_name, data in comparison_data.items() | sort(attribute='1.wt') %}
+                                
+                                {% set rank = loop.index %}
+                                {% set algo_color = 'var(--text-main)' %}
+                                
+                                {% if 'FCFS' in algo_name %}{% set algo_color = 'var(--ios-blue)' %}
+                                {% elif 'SJF (Non-Preemptive)' in algo_name %}{% set algo_color = 'var(--ios-green)' %}
+                                {% elif 'SJF (Preemptive)' in algo_name %}{% set algo_color = 'var(--ios-orange)' %}
+                                {% elif 'Priority (Non-Preemptive)' in algo_name %}{% set algo_color = 'var(--ios-purple)' %}
+                                {% elif 'Priority (Preemptive)' in algo_name %}{% set algo_color = 'var(--ios-red)' %}
+                                {% elif 'Round Robin' in algo_name %}{% set algo_color = 'var(--ios-indigo)' %}
+                                {% endif %}
+
+                              <tr {{ 'style="background-color: var(--input-bg);"'|safe if 
+      (algo_name == 'FCFS' and selected_algo == 'fcfs') or 
+      (algo_name == 'SJF (Non-Preemptive)' and selected_algo == 'sjf') or 
+      (algo_name == 'SJF (Preemptive)' and selected_algo == 'sjf_p') or 
+      (algo_name == 'Priority (Non-Preemptive)' and selected_algo == 'priority_np') or 
+      (algo_name == 'Priority (Preemptive)' and selected_algo == 'priority_p') or 
+      ('Round Robin' in algo_name and selected_algo == 'rr') else '' }}>
                                     
-                                    <td style="text-align: left; font-weight: 600; color: var(--accent-blue);">{{ algo_name }}</td>
+                                  <td style="text-align: left; font-weight: 700; --algo-color: {{ algo_color }}; display: flex; align-items: center; gap: 8px;">
+    <span style="color: var(--algo-color); display: flex; align-items: center; gap: 8px; width: 100%;">
+        <span class="rank-badge {% if rank <= 3 %}rank-{{ rank }}{% else %}rank-other{% endif %}">
+            {{ rank }}
+        </span>
+        {{ algo_name }}
+        {% if rank == 1 %}<i data-lucide="medal" style="width: 16px; color: #FFD700; margin-left: auto;"></i>{% endif %}
+    </span>
+</td>
                                     <td>{{ data.tat }} ms</td>
-                                    <td>{{ data.wt }} ms</td>
+                                    <td style="font-weight: 700;">{{ data.wt }} ms</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -293,17 +313,16 @@
                 </div>
 
             {% else %}
-                <div style="display: flex; align-items: center; justify-content: center; height: 100%; border: 2px dashed var(--border-color); border-radius: 16px; min-height: 400px; color: var(--text-muted); font-weight: 500;">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                        <i data-lucide="inbox" style="width: 48px; height: 48px; opacity: 0.5;"></i>
-                        Add processes and press Start Simulation.
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; border: 2px dashed var(--border-color); border-radius: 20px; min-height: 400px; color: var(--text-muted); font-weight: 600; background: var(--bg-card); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                        <i data-lucide="layers" style="width: 50px; height: 50px; opacity: 0.5;"></i>
+                        <p>Fill in process parameters and Start Simulation.</p>
                     </div>
                 </div>
             {% endif %}
         </div>
     </div>
 
-    <!-- Initialize Lucide Icons -->
     <script>
         lucide.createIcons();
     </script>
