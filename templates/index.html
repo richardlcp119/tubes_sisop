@@ -296,19 +296,19 @@
       (algo_name == 'FCFS' and selected_algo == 'fcfs') or 
       (algo_name == 'SJF (Non-Preemptive)' and selected_algo == 'sjf') or 
       (algo_name == 'SJF (Preemptive)' and selected_algo == 'sjf_p') or 
-      (algo_name == 'Priority (Non-Preemptive)' and selected_algo == 'priority_np') or 
-      (algo_name == 'Priority (Preemptive)' and selected_algo == 'priority_p') or 
+      (algo_name == 'PRI (Non-Preemptive)' and selected_algo == 'priority_np') or 
+      (algo_name == 'PRI (Preemptive)' and selected_algo == 'priority_p') or 
       ('Round Robin' in algo_name and selected_algo == 'rr') else '' }}>
                                     
                                   <td style="text-align: left; font-weight: 700; --algo-color: {{ algo_color }}; display: flex; align-items: center; gap: 8px;">
-    <span style="color: var(--algo-color); display: flex; align-items: center; gap: 8px; width: 100%;">
-        <span class="rank-badge {% if rank <= 3 %}rank-{{ rank }}{% else %}rank-other{% endif %}">
-            {{ rank }}
-        </span>
-        {{ algo_name }}
-        {% if rank == 1 %}<i data-lucide="medal" style="width: 16px; color: #FFD700; margin-left: auto;"></i>{% endif %}
-    </span>
-</td>
+            <span style="color: var(--algo-color); display: flex; align-items: center; gap: 8px; width: 100%;">
+                <span class="rank-badge {% if rank <= 3 %}rank-{{ rank }}{% else %}rank-other{% endif %}">
+                    {{ rank }}
+                </span>
+                {{ algo_name }}
+                {% if rank == 1 %}<i data-lucide="medal" style="width: 16px; color: #FFD700; margin-left: auto;"></i>{% endif %}
+            </span>
+        </td>
                                     <td>{{ data.tat }} ms</td>
                                     <td style="font-weight: 700;">{{ data.wt }} ms</td>
                                 </tr>

@@ -51,13 +51,13 @@ def index():
 
                 # 2. Tabel Perbandingan (Gunakan tuple unpacking untuk mengambil data yang diperlukan saja)
                 comparison_data['FCFS'] = {'tat': hitung_fcfs(arrival_times, burst_times)[2], 'wt': hitung_fcfs(arrival_times, burst_times)[3]}
-                comparison_data['SJF (NP)'] = {'tat': hitung_sjf(arrival_times, burst_times)[2], 'wt': hitung_sjf(arrival_times, burst_times)[3]}
-                comparison_data['SJF (P)'] = {'tat': hitung_sjf_preemptive(arrival_times, burst_times)[2], 'wt': hitung_sjf_preemptive(arrival_times, burst_times)[3]}
-                comparison_data[f'RR (Q={quantum})'] = {'tat': hitung_rr(arrival_times, burst_times, quantum)[2], 'wt': hitung_rr(arrival_times, burst_times, quantum)[3]}
+                comparison_data['SJF (Non-Preemptive)'] = {'tat': hitung_sjf(arrival_times, burst_times)[2], 'wt': hitung_sjf(arrival_times, burst_times)[3]}
+                comparison_data['SJF (Preemptive)'] = {'tat': hitung_sjf_preemptive(arrival_times, burst_times)[2], 'wt': hitung_sjf_preemptive(arrival_times, burst_times)[3]}
+                comparison_data[f'Round Robin (Q={quantum})'] = {'tat': hitung_rr(arrival_times, burst_times, quantum)[2], 'wt': hitung_rr(arrival_times, burst_times, quantum)[3]}
                 
                 if len(priority_times) == len(arrival_times):
-                    comparison_data['PRI (NP)'] = {'tat': hitung_priority(arrival_times, burst_times, priority_times)[2], 'wt': hitung_priority(arrival_times, burst_times, priority_times)[3]}
-                    comparison_data['PRI (P)'] = {'tat': hitung_priority_preemptive(arrival_times, burst_times, priority_times)[2], 'wt': hitung_priority_preemptive(arrival_times, burst_times, priority_times)[3]}
+                    comparison_data['PRI (Non-Preemptive)'] = {'tat': hitung_priority(arrival_times, burst_times, priority_times)[2], 'wt': hitung_priority(arrival_times, burst_times, priority_times)[3]}
+                    comparison_data['PRI (Preemptive)'] = {'tat': hitung_priority_preemptive(arrival_times, burst_times, priority_times)[2], 'wt': hitung_priority_preemptive(arrival_times, burst_times, priority_times)[3]}
 
             else:
                 hasil = "error_len"
