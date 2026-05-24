@@ -195,36 +195,41 @@
                     </div>
                 </div>
 
-               <!-- Metrics -->
-                <div class="metrics-grid">
-                    <div class="metric-box wt">
-                        <div class="metric-label">AVG WAITING<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(Avg WT)</span></div>
-                        <div class="metric-value">{{ rata_wt }}</div>
-                    </div>
-                    
-                    <div class="metric-box tat">
-                        <div class="metric-label">AVG TURNAROUND<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(Avg TAT)</span></div>
-                        <div class="metric-value">{{ rata_tat }}</div>
-                    </div>
-                    
-                    <!-- Tambahan: Average Response Time -->
-                    <div class="metric-box rt">
-                        <div class="metric-label">AVG RESPONSE<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(Avg RT)</span></div>
-                        <!-- Menggunakan default('0') agar website tidak crash jika app.py belum mengirim variabel ini -->
-                        <div class="metric-value">{{ rata_rt | default('0') }}</div>
-                    </div>
+             <!-- Metrics -->
+<div class="metrics-grid">
+    <!-- Baris 1: 4 Kartu Utama -->
+    <div class="metric-box wt"><div class="metric-label">AVG WAITING</div><div class="metric-value">{{ rata_wt }}</div></div>
+    <div class="metric-box tat"><div class="metric-label">AVG TURNAROUND</div><div class="metric-value">{{ rata_tat }}</div></div>
+    <div class="metric-box rt"><div class="metric-label">AVG RESPONSE</div><div class="metric-value">{{ rata_rt | default('0') }}</div></div>
+    <div class="metric-box throughput"><div class="metric-label">THROUGHPUT</div><div class="metric-value">{{ throughput }}</div></div>
 
-                    <div class="metric-box throughput">
-                        <div class="metric-label">THROUGHPUT<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(Process/Time)</span></div>
-                        <div class="metric-value">{{ throughput }}</div>
-                    </div>
-
-
-                    <div class="metric-box quantum" x-show="algo === 'rr'">
-                        <div class="metric-label">TIME QUANTUM<br><span style="font-size: 10px; opacity: 0.8; font-weight: 500; text-transform: none;">(TQ)</span></div>
-                        <div class="metric-value">{{ quantum }}</div>
-                    </div>
+   
+    <div class="cpu-util-wrapper">
+       
+        <template x-if="algo === 'rr'">
+            <div style="display:contents;">
+                <div class="metric-box cpu cpu-util-box" style="background: var(--ios-indigo);">
+                    <div class="metric-label">CPU UTIL</div>
+                    <div class="metric-value">{{ cpu_util | default('100%') }}</div>
                 </div>
+                <div class="metric-box quantum quantum-box">
+                    <div class="metric-label">TIME QUANTUM</div>
+                    <div class="metric-value">{{ quantum }}</div>
+                </div>
+            </div>
+        </template>
+
+      
+        <template x-if="algo !== 'rr'">
+            <div class="cpu-util-center">
+                <div class="metric-box cpu" style="background: var(--ios-indigo); width: 200px;">
+                    <div class="metric-label">CPU UTILIZATION</div>
+                    <div class="metric-value">{{ cpu_util | default('100%') }}</div>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
 
                 <!-- Process Details Table -->
                 <div class="card" x-data='{ tableData: {{ hasil | tojson | safe }} }'>

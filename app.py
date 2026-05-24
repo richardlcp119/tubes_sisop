@@ -11,37 +11,23 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    hasil = None
-    gantt = None
-    rata_tat = 0
-    rata_wt = 0
-    throughput = 0
+    hasil = None; gantt = None; rata_tat = 0; rata_wt = 0; rata_rt = 0; throughput = 0; cpu_util = "0%"
     quantum = 2 
-    comparison_data = {} # Menampung data untuk tabel perbandingan
-    
-    inputs_json = '[{"arrival": "", "burst": "", "priority": ""}]'
+    comparison_data = {} 
+    inputs_json = '[{"arrival": "", "burst": "", "priority": "1"}]'
     selected_algo = 'fcfs'
 
     if request.method == 'POST':
         try:
             selected_algo = request.form.get('algorithm', 'fcfs')
-            
-            quantum_raw = request.form.get('quantum', '2')
-            if quantum_raw.strip() != '':
-                quantum = int(quantum_raw)
+            quantum = int(request.form.get('quantum', 2))
             
             arrival_raw = request.form.getlist('arrival[]')
             burst_raw = request.form.getlist('burst[]')
             priority_raw = request.form.getlist('priority[]')
             
-            inputs_data = [
-                {
-                    'arrival': a, 
-                    'burst': b, 
-                    'priority': priority_raw[i] if i < len(priority_raw) else ""
-                } 
-                for i, (a, b) in enumerate(zip(arrival_raw, burst_raw))
-            ]
+            inputs_data = [{'arrival': a, 'burst': b, 'priority': priority_raw[i] if i < len(priority_raw) else "1"} 
+                           for i, (a, b) in enumerate(zip(arrival_raw, burst_raw))]
             inputs_json = json.dumps(inputs_data)
 
             arrival_times = [int(x) for x in arrival_raw if x.strip() != '']
@@ -49,56 +35,40 @@ def index():
             priority_times = [int(x) for x in priority_raw if x.strip() != '']
 
             if len(arrival_times) == len(burst_times) and len(arrival_times) > 0:
-                # 1. Hitung Algoritma Utama (Untuk Gantt Chart & Detail)
+                # 1. Hitung Algoritma Utama
                 if selected_algo == 'fcfs':
-                    hasil, gantt, rata_tat, rata_wt, throughput = hitung_fcfs(arrival_times.copy(), burst_times.copy())
+                    hasil, gantt, rata_tat, rata_wt, throughput, rata_rt, cpu_util = hitung_fcfs(arrival_times, burst_times)
                 elif selected_algo == 'sjf':
-                    hasil, gantt, rata_tat, rata_wt, throughput = hitung_sjf(arrival_times.copy(), burst_times.copy())
+                    hasil, gantt, rata_tat, rata_wt, throughput, rata_rt, cpu_util = hitung_sjf(arrival_times, burst_times)
                 elif selected_algo == 'sjf_p':
-                    hasil, gantt, rata_tat, rata_wt, throughput = hitung_sjf_preemptive(arrival_times.copy(), burst_times.copy())
-                elif selected_algo == 'priority_np':
-                    if len(priority_times) == len(arrival_times):
-                        hasil, gantt, rata_tat, rata_wt, throughput = hitung_priority(arrival_times.copy(), burst_times.copy(), priority_times.copy())
-                    else:
-                        hasil = "error_priority_len"
-                elif selected_algo == 'priority_p':
-                    if len(priority_times) == len(arrival_times):
-                        hasil, gantt, rata_tat, rata_wt, throughput = hitung_priority_preemptive(arrival_times.copy(), burst_times.copy(), priority_times.copy())
-                    else:
-                        hasil = "error_priority_len"
+                    hasil, gantt, rata_tat, rata_wt, throughput, rata_rt, cpu_util = hitung_sjf_preemptive(arrival_times, burst_times)
+                elif selected_algo == 'priority_np' and len(priority_times) == len(arrival_times):
+                    hasil, gantt, rata_tat, rata_wt, throughput, rata_rt, cpu_util = hitung_priority(arrival_times, burst_times, priority_times)
+                elif selected_algo == 'priority_p' and len(priority_times) == len(arrival_times):
+                    hasil, gantt, rata_tat, rata_wt, throughput, rata_rt, cpu_util = hitung_priority_preemptive(arrival_times, burst_times, priority_times)
                 elif selected_algo == 'rr':
-                    hasil, gantt, rata_tat, rata_wt, throughput = hitung_rr(arrival_times.copy(), burst_times.copy(), quantum)
+                    hasil, gantt, rata_tat, rata_wt, throughput, rata_rt, cpu_util = hitung_rr(arrival_times, burst_times, quantum)
 
-                # 2. Hitung Semua Algoritma untuk Tabel Perbandingan
-                if hasil not in ["error_len", "error_priority_len", "error_val"]:
-                    _, _, c_tat, c_wt, _ = hitung_fcfs(arrival_times.copy(), burst_times.copy())
-                    comparison_data['FCFS'] = {'tat': c_tat, 'wt': c_wt}
-                    
-                    _, _, c_tat, c_wt, _ = hitung_sjf(arrival_times.copy(), burst_times.copy())
-                    comparison_data['SJF (Non-Preemptive)'] = {'tat': c_tat, 'wt': c_wt}
-                    
-                    _, _, c_tat, c_wt, _ = hitung_sjf_preemptive(arrival_times.copy(), burst_times.copy())
-                    comparison_data['SJF (Preemptive)'] = {'tat': c_tat, 'wt': c_wt}
-                    
-                    _, _, c_tat, c_wt, _ = hitung_rr(arrival_times.copy(), burst_times.copy(), quantum)
-                    comparison_data[f'Round Robin (Q={quantum})'] = {'tat': c_tat, 'wt': c_wt}
-                    
-                    if len(priority_times) == len(arrival_times):
-                        _, _, c_tat, c_wt, _ = hitung_priority(arrival_times.copy(), burst_times.copy(), priority_times.copy())
-                        comparison_data['Priority (Non-Preemptive)'] = {'tat': c_tat, 'wt': c_wt}
-                        
-                        _, _, c_tat, c_wt, _ = hitung_priority_preemptive(arrival_times.copy(), burst_times.copy(), priority_times.copy())
-                        comparison_data['Priority (Preemptive)'] = {'tat': c_tat, 'wt': c_wt}
+                # 2. Tabel Perbandingan (Gunakan tuple unpacking untuk mengambil data yang diperlukan saja)
+                comparison_data['FCFS'] = {'tat': hitung_fcfs(arrival_times, burst_times)[2], 'wt': hitung_fcfs(arrival_times, burst_times)[3]}
+                comparison_data['SJF (NP)'] = {'tat': hitung_sjf(arrival_times, burst_times)[2], 'wt': hitung_sjf(arrival_times, burst_times)[3]}
+                comparison_data['SJF (P)'] = {'tat': hitung_sjf_preemptive(arrival_times, burst_times)[2], 'wt': hitung_sjf_preemptive(arrival_times, burst_times)[3]}
+                comparison_data[f'RR (Q={quantum})'] = {'tat': hitung_rr(arrival_times, burst_times, quantum)[2], 'wt': hitung_rr(arrival_times, burst_times, quantum)[3]}
+                
+                if len(priority_times) == len(arrival_times):
+                    comparison_data['PRI (NP)'] = {'tat': hitung_priority(arrival_times, burst_times, priority_times)[2], 'wt': hitung_priority(arrival_times, burst_times, priority_times)[3]}
+                    comparison_data['PRI (P)'] = {'tat': hitung_priority_preemptive(arrival_times, burst_times, priority_times)[2], 'wt': hitung_priority_preemptive(arrival_times, burst_times, priority_times)[3]}
 
             else:
                 hasil = "error_len"
-        except ValueError:
+        except Exception as e:
+            print(f"Error: {e}")
             hasil = "error_val"
 
-    return render_template('index.html', hasil=hasil, gantt=gantt, 
-                           rata_tat=rata_tat, rata_wt=rata_wt, 
-                           throughput=throughput, inputs_json=inputs_json,
-                           selected_algo=selected_algo, quantum=quantum,
+    return render_template('index.html', hasil=hasil, gantt=gantt, rata_tat=rata_tat, 
+                           rata_wt=rata_wt, rata_rt=rata_rt, cpu_util=cpu_util, 
+                           throughput=throughput, inputs_json=inputs_json, 
+                           selected_algo=selected_algo, quantum=quantum, 
                            comparison_data=comparison_data)
 
 if __name__ == '__main__':

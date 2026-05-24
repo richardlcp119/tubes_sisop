@@ -159,10 +159,25 @@ body {
 
 .metrics-grid { 
     display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
+    grid-template-columns: repeat(4, 1fr); 
     gap: 15px; 
     margin-bottom: 20px; 
 }
+
+/* Memastikan kartu CPU UTIL berada di tengah bawah baris kedua */
+.cpu-util-wrapper {
+    grid-column: span 4; /* Melebar penuh */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Tetap mengikuti grid 4 kolom */
+    gap: 15px;
+}
+
+/* Jika ada Time Quantum, CPU Util menempati kolom 2, TQ kolom 3 */
+.cpu-util-box { grid-column: 2; }
+.quantum-box { grid-column: 3; }
+
+/* Jika TIDAK ada Time Quantum, CPU Util menempati kolom 2 (tengah) */
+.cpu-util-center { grid-column: 2 / span 2; display: flex; justify-content: center; }
 .metric-box { padding: 16px; border-radius: 16px; color: white; box-shadow: var(--shadow-card); }
 .metric-box.wt { background: var(--ios-orange); }
 .metric-box.tat { background: var(--ios-purple); }
