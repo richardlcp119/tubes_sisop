@@ -30,7 +30,17 @@ def hitung_rr(arrival_times, burst_times, quantum):
     while completed < n:
         if not ready_queue:
             if idx_proses < n:
-                waktu_sekarang = proses_sorted[idx_proses]['arrival_time']
+                next_arrival = proses_sorted[idx_proses]['arrival_time']
+                
+                if waktu_sekarang < next_arrival:
+                    gantt_chart.append({
+                        'id': 'Idle',
+                        'start': waktu_sekarang,
+                        'end': next_arrival
+                    })
+                
+                waktu_sekarang = next_arrival
+                
                 while idx_proses < n and proses_sorted[idx_proses]['arrival_time'] <= waktu_sekarang:
                     ready_queue.append(proses_sorted[idx_proses])
                     idx_proses += 1
