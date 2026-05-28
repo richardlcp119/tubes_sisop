@@ -31,10 +31,11 @@ def hitung_priority_preemptive(arrival_times, burst_times, priorities):
             eligible.sort(key=lambda x: (x['priority'], x['arrival_time']))
             p_terpilih = eligible[0]
             
-            #  Logika Response Time ---
+            # Logika Response Time
             if p_terpilih['first_start_time'] == -1:
                 p_terpilih['first_start_time'] = waktu_sekarang
             
+            # Jika CPU beralih dari satu proses ke proses lain, atau dari 'Idle' ke proses
             if proses_sebelumnya != p_terpilih['id']:
                 if proses_sebelumnya is not None:
                     gantt_chart.append({'id': proses_sebelumnya, 'start': start_time_gantt, 'end': waktu_sekarang})
@@ -48,35 +49,40 @@ def hitung_priority_preemptive(arrival_times, burst_times, priorities):
                 p_terpilih['finish_time'] = waktu_sekarang
                 p_terpilih['turnaround_time'] = p_terpilih['finish_time'] - p_terpilih['arrival_time']
                 p_terpilih['waiting_time'] = p_terpilih['turnaround_time'] - p_terpilih['burst_time']
-                # Response Time = Waktu pertama eksekusi - Arrival Time
                 p_terpilih['response_time'] = p_terpilih['first_start_time'] - p_terpilih['arrival_time']
                 p_terpilih['is_completed'] = True
                 selesai += 1
         else:
-            if proses_sebelumnya is not None:
-                gantt_chart.append({'id': proses_sebelumnya, 'start': start_time_gantt, 'end': waktu_sekarang})
-                proses_sebelumnya = None
+            # REVISI: Jika tidak ada proses yang siap (CPU menganggur)
+            if proses_sebelumnya != 'Idle':
+                if proses_sebelumnya is not None:
+                    # Simpan proses terakhir yang berjalan sebelum CPU idle
+                    gantt_chart.append({'id': proses_sebelumnya, 'start': start_time_gantt, 'end': waktu_sekarang})
+                start_time_gantt = waktu_sekarang
+                proses_sebelumnya = 'Idle' # Ubah state menjadi Idle
+            
             waktu_sekarang += 1
 
+    # Memasukkan proses terakhir atau idle terakhir ke dalam Gantt Chart setelah loop selesai
     if proses_sebelumnya is not None:
         gantt_chart.append({'id': proses_sebelumnya, 'start': start_time_gantt, 'end': waktu_sekarang})
 
     # Kalkulasi rata-rata
     total_tat = sum(p['turnaround_time'] for p in proses)
     total_wt = sum(p['waiting_time'] for p in proses)
-    total_rt = sum(p['response_time'] for p in proses) # TAMBAHAN
+    total_rt = sum(p['response_time'] for p in proses) 
     
     rata_tat = round(total_tat / n, 3) if n > 0 else 0
     rata_wt = round(total_wt / n, 3) if n > 0 else 0
-    rata_rt = round(total_rt / n, 3) if n > 0 else 0   # TAMBAHAN
+    rata_rt = round(total_rt / n, 3) if n > 0 else 0   
     
     total_waktu = waktu_sekarang - min(p['arrival_time'] for p in proses) if n > 0 else 1
     throughput = round(n / total_waktu, 3) if total_waktu > 0 else 0
     
-    #  CPU Utilization ---
+    # CPU Utilization
     cpu_util = round((total_burst_kerja / total_waktu) * 100, 2) if total_waktu > 0 else 0
     cpu_util_str = f"{cpu_util}%"
     
     proses.sort(key=lambda x: x['id'])
-    # Mengembalikan 7 nilai agar konsisten dengan algoritma lain
+    
     return proses, gantt_chart, rata_tat, rata_wt, throughput, rata_rt, cpu_util_str
