@@ -51,11 +51,11 @@ def hitung_sjf(arrival_times, burst_times):
     # Hitung nilai rata-rata
     total_tat = sum(p['turnaround_time'] for p in proses)
     total_wt = sum(p['waiting_time'] for p in proses)
-    total_rt = sum(p['response_time'] for p in proses) # TAMBAHAN
+    total_rt = sum(p['response_time'] for p in proses) 
     
     rata_tat = round(total_tat / n, 3) if n > 0 else 0
     rata_wt = round(total_wt / n, 3) if n > 0 else 0
-    rata_rt = round(total_rt / n, 3) if n > 0 else 0 # TAMBAHAN
+    rata_rt = round(total_rt / n, 3) if n > 0 else 0 
     
     # Hitung Throughput & CPU Utilization
     total_rentang_waktu = waktu_sekarang - min(p['arrival_time'] for p in proses) if n > 0 else 1

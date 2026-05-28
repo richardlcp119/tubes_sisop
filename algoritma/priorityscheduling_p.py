@@ -9,12 +9,12 @@ def hitung_priority_preemptive(arrival_times, burst_times, priorities):
             'burst_time': burst_times[i],
             'remaining_time': burst_times[i],
             'priority': priorities[i],
-            'first_start_time': -1, # TAMBAHAN
+            'first_start_time': -1, 
             'is_completed': False,
             'finish_time': 0,
             'turnaround_time': 0,
             'waiting_time': 0,
-            'response_time': 0      # TAMBAHAN
+            'response_time': 0      
         })
     
     waktu_sekarang = 0
@@ -22,7 +22,7 @@ def hitung_priority_preemptive(arrival_times, burst_times, priorities):
     gantt_chart = []
     proses_sebelumnya = None
     start_time_gantt = 0
-    total_burst_kerja = sum(burst_times) # TAMBAHAN
+    total_burst_kerja = sum(burst_times) 
     
     while selesai < n:
         eligible = [p for p in proses if p['arrival_time'] <= waktu_sekarang and not p['is_completed']]
@@ -31,7 +31,7 @@ def hitung_priority_preemptive(arrival_times, burst_times, priorities):
             eligible.sort(key=lambda x: (x['priority'], x['arrival_time']))
             p_terpilih = eligible[0]
             
-            # --- TAMBAHAN: Logika Response Time ---
+            #  Logika Response Time ---
             if p_terpilih['first_start_time'] == -1:
                 p_terpilih['first_start_time'] = waktu_sekarang
             
@@ -73,7 +73,7 @@ def hitung_priority_preemptive(arrival_times, burst_times, priorities):
     total_waktu = waktu_sekarang - min(p['arrival_time'] for p in proses) if n > 0 else 1
     throughput = round(n / total_waktu, 3) if total_waktu > 0 else 0
     
-    # --- TAMBAHAN: CPU Utilization ---
+    #  CPU Utilization ---
     cpu_util = round((total_burst_kerja / total_waktu) * 100, 2) if total_waktu > 0 else 0
     cpu_util_str = f"{cpu_util}%"
     

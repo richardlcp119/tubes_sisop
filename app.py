@@ -49,7 +49,7 @@ def index():
                 elif selected_algo == 'rr':
                     hasil, gantt, rata_tat, rata_wt, throughput, rata_rt, cpu_util = hitung_rr(arrival_times, burst_times, quantum)
 
-                # 2. Tabel Perbandingan (Gunakan tuple unpacking untuk mengambil data yang diperlukan saja)
+                # 2. Tabel Perbandingan 
                 comparison_data['FCFS'] = {'tat': hitung_fcfs(arrival_times, burst_times)[2], 'wt': hitung_fcfs(arrival_times, burst_times)[3]}
                 comparison_data['SJF (Non-Preemptive)'] = {'tat': hitung_sjf(arrival_times, burst_times)[2], 'wt': hitung_sjf(arrival_times, burst_times)[3]}
                 comparison_data['SJF (Preemptive)'] = {'tat': hitung_sjf_preemptive(arrival_times, burst_times)[2], 'wt': hitung_sjf_preemptive(arrival_times, burst_times)[3]}

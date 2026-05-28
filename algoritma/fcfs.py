@@ -15,7 +15,7 @@ def hitung_fcfs(arrival_times, burst_times):
     waktu_sekarang = 0
     gantt_chart = []
     
-    # --- TAMBAHAN: Variabel untuk Util ---
+    # Variabel untuk Util ---
     total_waktu_kerja = 0
     
     for p in proses:
@@ -48,11 +48,11 @@ def hitung_fcfs(arrival_times, burst_times):
     # Hitung nilai rata-rata
     total_tat = sum(p['turnaround_time'] for p in proses)
     total_wt = sum(p['waiting_time'] for p in proses)
-    total_rt = sum(p['response_time'] for p in proses) # TAMBAHAN
+    total_rt = sum(p['response_time'] for p in proses) 
     
     rata_tat = round(total_tat / n, 3) if n > 0 else 0
     rata_wt = round(total_wt / n, 3) if n > 0 else 0
-    rata_rt = round(total_rt / n, 3) if n > 0 else 0   # TAMBAHAN
+    rata_rt = round(total_rt / n, 3) if n > 0 else 0  
     
     # Throughput & CPU Utilization
     total_waktu = waktu_sekarang - proses[0]['arrival_time'] if n > 0 else 1

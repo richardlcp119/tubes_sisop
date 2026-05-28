@@ -8,7 +8,7 @@ def hitung_rr(arrival_times, burst_times, quantum):
             'arrival_time': arrival_times[i],
             'burst_time': burst_times[i],
             'remaining_time': burst_times[i],
-            'first_start_time': -1, # TAMBAHAN: Untuk Response Time
+            'first_start_time': -1, 
             'finish_time': 0,
             'turnaround_time': 0,
             'waiting_time': 0
@@ -38,7 +38,7 @@ def hitung_rr(arrival_times, burst_times, quantum):
         
         p = ready_queue.pop(0)
         
-        # --- TAMBAHAN: Logika Response Time ---
+        #  Logika Response Time ---
         if p['first_start_time'] == -1:
             p['first_start_time'] = waktu_sekarang
             
@@ -69,17 +69,17 @@ def hitung_rr(arrival_times, burst_times, quantum):
     # Hitung rata-rata
     total_tat = sum(p['turnaround_time'] for p in proses)
     total_wt = sum(p['waiting_time'] for p in proses)
-    total_rt = sum(p['response_time'] for p in proses) # TAMBAHAN
+    total_rt = sum(p['response_time'] for p in proses) 
     
     rata_tat = round(total_tat / n, 3) if n > 0 else 0
     rata_wt = round(total_wt / n, 3) if n > 0 else 0
-    rata_rt = round(total_rt / n, 3) if n > 0 else 0   # TAMBAHAN
+    rata_rt = round(total_rt / n, 3) if n > 0 else 0   
     
     waktu_awal = min(p['arrival_time'] for p in proses) if n > 0 else 0
     total_waktu = waktu_sekarang - waktu_awal if n > 0 else 1
     throughput = round(n / total_waktu, 3) if total_waktu > 0 else 0
     
-    # --- TAMBAHAN: CPU Utilization ---
+    #  CPU Utilization ---
     cpu_util = round((total_burst_kerja / total_waktu) * 100, 2) if total_waktu > 0 else 0
     cpu_util_str = f"{cpu_util}%"
     

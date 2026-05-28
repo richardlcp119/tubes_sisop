@@ -8,7 +8,7 @@ def hitung_sjf_preemptive(arrival_times, burst_times):
             'arrival_time': arrival_times[i],
             'burst_time': burst_times[i],
             'remaining_time': burst_times[i],
-            'first_start_time': -1, # TAMBAHAN: Untuk melacak saat pertama kali dieksekusi
+            'first_start_time': -1, 
             'is_completed': False
         })
     
@@ -25,7 +25,7 @@ def hitung_sjf_preemptive(arrival_times, burst_times):
             eligible.sort(key=lambda x: (x['remaining_time'], x['arrival_time']))
             p = eligible[0]
             
-            # --- TAMBAHAN: Logika Response Time ---
+            # --- Logika Response Time ---
             if p['first_start_time'] == -1:
                 p['first_start_time'] = waktu_sekarang
             
@@ -42,7 +42,6 @@ def hitung_sjf_preemptive(arrival_times, burst_times):
                 p['finish_time'] = waktu_sekarang
                 p['turnaround_time'] = p['finish_time'] - p['arrival_time']
                 p['waiting_time'] = p['turnaround_time'] - p['burst_time']
-                # Response Time = Waktu pertama kali eksekusi - Arrival Time
                 p['response_time'] = p['first_start_time'] - p['arrival_time']
                 p['is_completed'] = True
                 selesai += 1
@@ -60,16 +59,16 @@ def hitung_sjf_preemptive(arrival_times, burst_times):
     # Hitung rata-rata
     total_tat = sum(p['turnaround_time'] for p in proses)
     total_wt = sum(p['waiting_time'] for p in proses)
-    total_rt = sum(p['response_time'] for p in proses) # TAMBAHAN
+    total_rt = sum(p['response_time'] for p in proses) 
     
     rata_tat = round(total_tat / n, 3) if n > 0 else 0
     rata_wt = round(total_wt / n, 3) if n > 0 else 0
-    rata_rt = round(total_rt / n, 3) if n > 0 else 0   # TAMBAHAN
+    rata_rt = round(total_rt / n, 3) if n > 0 else 0  
     
     total_waktu = waktu_sekarang - min(p['arrival_time'] for p in proses) if n > 0 else 1
     throughput = round(n / total_waktu, 3) if total_waktu > 0 else 0
     
-    # --- TAMBAHAN: CPU Utilization ---
+    #  CPU Utilization ---
     total_burst = sum(p['burst_time'] for p in proses)
     cpu_util = round((total_burst / total_waktu) * 100, 2) if total_waktu > 0 else 0
     cpu_util_str = f"{cpu_util}%"
