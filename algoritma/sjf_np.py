@@ -31,7 +31,6 @@ def hitung_sjf(arrival_times, burst_times):
             
             # Response Time untuk Non-Preemptive = Waiting Time
             p['response_time'] = p['waiting_time']
-            
             p['is_completed'] = True
             total_burst_kerja += p['burst_time']
             
@@ -44,9 +43,17 @@ def hitung_sjf(arrival_times, burst_times):
             waktu_sekarang = p['finish_time']
             selesai += 1
         else:
-            # Jika CPU idle
+            # JIKA CPU IDLE: Catat blok Idle ke Gantt Chart sebelum memajukan waktu
             pending = [p for p in proses if not p['is_completed']]
-            waktu_sekarang = min(p['arrival_time'] for p in pending)
+            waktu_berikutnya = min(p['arrival_time'] for p in pending)
+            
+            gantt_chart.append({
+                'id': 'Idle',
+                'start': waktu_sekarang,
+                'end': waktu_berikutnya
+            })
+            
+            waktu_sekarang = waktu_berikutnya
 
     # Hitung nilai rata-rata
     total_tat = sum(p['turnaround_time'] for p in proses)
@@ -60,12 +67,7 @@ def hitung_sjf(arrival_times, burst_times):
     # Hitung Throughput & CPU Utilization
     total_rentang_waktu = waktu_sekarang - min(p['arrival_time'] for p in proses) if n > 0 else 1
     throughput = round(n / total_rentang_waktu, 3) if total_rentang_waktu > 0 else 0
+    cpu_util = f"{round((total_burst_kerja / total_rentang_waktu) * 100, 2)}%" if total_rentang_waktu > 0 else "0%"
     
-    # CPU Utilization = (Total burst waktu kerja / Total rentang waktu) * 100
-    cpu_util = round((total_burst_kerja / total_rentang_waktu) * 100, 2) if total_rentang_waktu > 0 else 0
-    cpu_util_str = f"{cpu_util}%"
-    
-    proses.sort(key=lambda x: x['id'])
-    
-    # Kembalikan 7 variabel
-    return proses, gantt_chart, rata_tat, rata_wt, throughput, rata_rt, cpu_util_str
+    proses.sort(key=lambda x: int(x['id'][1:]))
+    return proses, gantt_chart, rata_tat, rata_wt, rata_rt, throughput, cpu_util
