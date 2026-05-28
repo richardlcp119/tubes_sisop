@@ -43,6 +43,7 @@ def hitung_rr(arrival_times, burst_times, quantum):
                 
                 waktu_sekarang = next_arrival
                 
+                # Masukkan proses yang sudah tiba setelah CPU idle
                 while idx_proses < n and proses_sorted[idx_proses]['arrival_time'] <= waktu_sekarang:
                     ready_queue.append(proses_sorted[idx_proses])
                     idx_proses += 1
