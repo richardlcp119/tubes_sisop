@@ -22,14 +22,16 @@ def hitung_rr(arrival_times, burst_times, quantum):
     idx_proses = 0 
     total_burst_kerja = sum(burst_times) # Untuk CPU Utilization
 
-    # Masukkan proses awal
+    # Masukkan proses awal ke ready queue
     while idx_proses < n and proses_sorted[idx_proses]['arrival_time'] <= waktu_sekarang:
         ready_queue.append(proses_sorted[idx_proses])
         idx_proses += 1
-        
+
+    # Proses utama Round Robin    
     while completed < n:
         if not ready_queue:
             if idx_proses < n:
+                # Jika ready queue kosong, lompat ke waktu kedatangan proses berikutnya
                 next_arrival = proses_sorted[idx_proses]['arrival_time']
                 
                 if waktu_sekarang < next_arrival:
@@ -41,11 +43,13 @@ def hitung_rr(arrival_times, burst_times, quantum):
                 
                 waktu_sekarang = next_arrival
                 
+                # Masukkan proses yang sudah tiba setelah CPU idle
                 while idx_proses < n and proses_sorted[idx_proses]['arrival_time'] <= waktu_sekarang:
                     ready_queue.append(proses_sorted[idx_proses])
                     idx_proses += 1
             continue
         
+        # Ambil proses pertama dari ready queue
         p = ready_queue.pop(0)
         
         #  Logika Response Time ---
@@ -57,16 +61,19 @@ def hitung_rr(arrival_times, burst_times, quantum):
         waktu_sekarang += time_to_run
         p['remaining_time'] -= time_to_run
         
+        # Tambahkan ke Gantt Chart ---
         gantt_chart.append({
             'id': p['id'],
             'start': start_time,
             'end': waktu_sekarang
         })
         
+        # Masukkan proses baru yang tiba selama eksekusi ke ready queue ---
         while idx_proses < n and proses_sorted[idx_proses]['arrival_time'] <= waktu_sekarang:
             ready_queue.append(proses_sorted[idx_proses])
             idx_proses += 1
             
+        # Update proses setelah eksekusi ---    
         if p['remaining_time'] > 0:
             ready_queue.append(p)
         else:

@@ -47,11 +47,25 @@ def hitung_sjf_preemptive(arrival_times, burst_times):
                 selesai += 1
         else:
             if current_id is not None:
-                gantt_chart.append({'id': current_id, 'start': start_time, 'end': waktu_sekarang})
+                gantt_chart.append({
+                    'id': current_id,
+                    'start': start_time,
+                    'end': waktu_sekarang
+                })
                 current_id = None
-            
+
+
             pending = [p for p in proses if not p['is_completed']]
-            waktu_sekarang = min(p['arrival_time'] for p in pending)
+            next_arrival = min(p['arrival_time'] for p in pending)
+
+    
+            gantt_chart.append({
+                'id': 'idle',
+                'start': waktu_sekarang,
+                'end': next_arrival
+            })
+
+            waktu_sekarang = next_arrival
 
     if current_id is not None:
         gantt_chart.append({'id': current_id, 'start': start_time, 'end': waktu_sekarang})

@@ -9,7 +9,7 @@ def hitung_fcfs(arrival_times, burst_times):
             'burst_time': burst_times[i]
         })
     
-    # Prinsip FCFS: Urutkan berdasarkan waktu kedatangan terkecil
+    # Prinsip FCFS: Urutkan dari waktu kedatangan terkecil
     proses.sort(key=lambda x: x['arrival_time'])
     
     waktu_sekarang = 0
@@ -19,7 +19,7 @@ def hitung_fcfs(arrival_times, burst_times):
     total_waktu_kerja = 0
     
     for p in proses:
-        # Jika CPU sempat menganggur sebelum proses ini datang
+        # Jika CPU menganggur sebelum proses datang
         if waktu_sekarang < p['arrival_time']:
             gantt_chart.append({
                 'id': 'Idle',
